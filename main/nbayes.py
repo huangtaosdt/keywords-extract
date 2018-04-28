@@ -9,12 +9,14 @@ class NBayes(object):
         self.vacabulary = []
         self.idf = 0
         self.tf = 0
+        self.tfidf=0
         self.tdm = 0  # p(x|y)
         self.Pcates = {}  # p(y)
         self.labels = []  # 每个文本的分类
         self.doclength = 0  # 训练集文本数
         self.vacablen = 0  # 词典词长
         self.testset = 0  # 测试集
+
 
     def train_set(self, trainset, classVec):
         self.cate_prob(classVec)
@@ -65,9 +67,9 @@ class NBayes(object):
         predclass=""
         for tdm_vector,keyclass in zip(self.tdm,self.Pcates):
             temp=np.sum(testset*tdm_vector*self.Pcates[keyclass])
-            print testset,tdm_vector,self.Pcates[keyclass]
-            print temp
-            print "*"*10
+            # print testset,tdm_vector,self.Pcates[keyclass]
+            # print temp
+            # print "*"*10
             if temp>predvalue:
                 predvalue=temp
                 predclass=keyclass
@@ -84,19 +86,34 @@ class NBayes(object):
             for sigleword in set(trainset[indx]):
                 self.idf[0,self.vacabulary.index(sigleword)]+=1
         self.idf=np.log(float(self.doclength)/self.idf)
-        self.tf=np.multiply(self.tf,self.idf)
+        self.tfidf=np.multiply(self.tf,self.idf)
+
+    def get_key_word(self):
+        top = 3
+        sorted_indx = np.argsort(-nb.tfidf)
+
+        keyword_trainset = []
+        for i, indxs in enumerate(sorted_indx):
+            keyword_doc = []
+            for indx in indxs:
+                # if nb.tf[indx]!=0:
+                if nb.tf[i][indx] != 0 and len(keyword_doc) < 3:
+                    keyword_doc.append(nb.vacabulary[indx])
+            keyword_trainset.append(keyword_doc)
+        return keyword_trainset
 
 
 if __name__ == '__main__':
     trainset=[['你','吃饭','了','吗'],
               ['你','喝水','了','吗'],
-              ['你', '睡醒', '了', '吗']]
+              ['你', '睡醒', '了', '吗'],
+              ['我','玩']]
 
     nb=NBayes()
-    nb.train_set(trainset,[0,1,1])
+    nb.train_set(trainset,[0,1,1,1])
     nb.cal_tfidf(trainset)
     print nb.idf
-    print nb.tf
+    print nb.tfidf
     print ' '.join(nb.vacabulary)
     nb.map2vocab(trainset[0])
     print nb.predict(nb.testset)
@@ -104,8 +121,22 @@ if __name__ == '__main__':
     # print nb.predict(nb.testset)
     # nb.map2vocab(trainset[2])
     # print nb.predict(nb.testset)
+    print "*"*10
+    top=3
+    sorted_indx = np.argsort(-nb.tfidf)
 
+    keyword_trainset=[]
+    for i,indxs in enumerate(sorted_indx):
+        keyword_doc = []
+        for indx in indxs:
+            # if nb.tf[indx]!=0:
+            if nb.tf[i][indx]!=0 and len(keyword_doc)<3:
+                keyword_doc.append(nb.vacabulary[indx])
+        keyword_trainset.append(keyword_doc)
+        print " ".join(keyword_doc)
 
+    # for doc in keyword_trainset:
+    #     print " ".join(doc)
 
 
 
