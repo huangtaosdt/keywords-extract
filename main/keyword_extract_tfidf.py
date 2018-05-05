@@ -93,6 +93,7 @@ class KWExtracter(object):
 
 def load_dataset(trainset):
     import jieba
+
     docs = []
     for doc in trainset:
         doc = jieba.cut(doc)
