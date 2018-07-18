@@ -4,9 +4,6 @@
 
 '''
 用TextRank算法抽取关键词
-@author zhangjialin
-微信公众号：FinTech修行僧
-edit_time:2017.11.19
 '''
 
 import jieba
